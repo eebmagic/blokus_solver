@@ -9,12 +9,13 @@ source_dir = "./source_images/"
 images = os.listdir(source_dir)
 images = [x for x in images if x.lower().endswith(".png")]
 
-image = images[0]
+# load image
+image = images[1]
 im = Image.open(source_dir + image)
 im = im.resize((22*12, 22*12))
 data = list(im.getdata())
-# print(data)
 
+# make smooth & low-color image
 rounded_image = round_image.roundimage(im, factor=50)
 smooth_img = round_image.smoothimage(im, tolerance=50)
 smooth_img = round_image.smoothimage(smooth_img, tolerance=75)
