@@ -5,7 +5,8 @@ SHORT TERM:
     - perhaps use sklearn for group classification of colors
         - would require long amount of time (maybe over class weekend?)
 
-- Use HoughLines to figure out piece sizes
+- Figure out piece sizes
+    - HoughLines ?
     - using smallest parallel distances
 
 

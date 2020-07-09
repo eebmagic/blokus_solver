@@ -32,6 +32,8 @@ brightened = enhancer.enhance(brightness_increase)
 # top = analyze.color_counts(smooth_img, roundThresh=50, total=5)
 brightened = brightened.resize((22*8, 22*8))
 counts = analyze.color_counts(brightened, roundThresh=75)
+print(counts)
+quit()
 top = analyze.color_counts(brightened, roundThresh=75, total=6)
 pallete = [x[0] for x in top]
 print(len(counts), len(top), (22*8)**2)
@@ -39,22 +41,23 @@ print(top)
 
 
 # Make image with pallete from smooth image
-# from_pallete = round_image.from_pallete(smooth_img, [x[0] for x in top])
 from_pallete = round_image.from_pallete(brightened, pallete)
 
-# Find board color
+# Find and replace board color with white
 board_color = analyze.find_board_color(from_pallete)
 print(f"board color is: {board_color}, {counts[board_color]}")
-# Replace board color with pure white
 from_pallete = round_image.replace_color(from_pallete, board_color, (255, 255, 255))
 
-# Show images
-# smooth_img.show()
-brightened.show()
-from_pallete.show()
 
 # Make color pallete image for visual check
 pallete = Image.new("RGB", (len(top), 1))
 pallete.putdata([x[0] for x in top])
-pallete.show()
+
+
+# Show images
+# rounded_image.show()
+# smooth_img.show()
+brightened.show()
+from_pallete.show()
+# pallete.show()
 
