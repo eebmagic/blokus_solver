@@ -1,4 +1,5 @@
 from PIL import Image
+from PIL import ImageEnhance
 import make_pallete_image
 import round_image
 import analyze
@@ -9,39 +10,49 @@ source_dir = "./source_images/"
 images = os.listdir(source_dir)
 images = [x for x in images if x.lower().endswith(".png")]
 
-# load image
-image = images[1]
+# Load image
+image = images[2]
 im = Image.open(source_dir + image)
 im = im.resize((22*12, 22*12))
 data = list(im.getdata())
 
-# make smooth & low-color image
+# Make smooth & low-color image
 rounded_image = round_image.roundimage(im, factor=50)
 smooth_img = round_image.smoothimage(im, tolerance=50)
 smooth_img = round_image.smoothimage(smooth_img, tolerance=75)
 
+# Increase exposure of rounded image
+enhancer = ImageEnhance.Brightness(smooth_img)
+brightness_increase = 1.2
+brightened = enhancer.enhance(brightness_increase)
+
+# Resize and get counts
 # rounded_image = rounded_image.resize((22*4, 22*4))
-smooth_img = smooth_img.resize((22*8, 22*8))
-counts = analyze.color_counts(smooth_img, roundThresh=50)
-top = analyze.color_counts(smooth_img, roundThresh=50, total=5)
+# smooth_img = smooth_img.resize((22*8, 22*8))
+# counts = analyze.color_counts(smooth_img, roundThresh=50)
+# top = analyze.color_counts(smooth_img, roundThresh=50, total=5)
+brightened = brightened.resize((22*8, 22*8))
+counts = analyze.color_counts(brightened, roundThresh=75)
+top = analyze.color_counts(brightened, roundThresh=75, total=6)
 print(len(counts), len(top), (22*8)**2)
 print(top)
 
 
-from_pallete = round_image.from_pallete(smooth_img, [x[0] for x in top])
+# Make image with pallete from smooth image
+# from_pallete = round_image.from_pallete(smooth_img, [x[0] for x in top])
+from_pallete = round_image.from_pallete(brightened, [x[0] for x in top])
 
-smooth_img.show()
+# Show images
+# smooth_img.show()
+brightened.show()
 from_pallete.show()
 
+# Find board color
 board_color = analyze.find_board_color([x[0] for x in top])
 print(f"board color is: {board_color}, {counts[board_color]}")
 
-# Make color pallete for visual check
+# Make color pallete image for visual check
 pallete = Image.new("RGB", (len(top), 1))
 pallete.putdata([x[0] for x in top])
 pallete.show()
 
-# colors = make_pallete_image.make_pallete(data, factor=20, out_count=4)
-# make_pallete_image.make_output_image(colors, save_name="output.png")
-
-# im.show()

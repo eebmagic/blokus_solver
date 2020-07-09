@@ -1,4 +1,7 @@
 - Tweak color smoothing and exposure to optimize piece colors
+    - adjust palletes development to avoid choosing colors within a given distance threshold
+    - perhaps use sklearn for group classification of colors
+
 - Use Harris corner detection for finding corners of board
     - use corners and do math to determine angle adjusted coordinates to check piece colors
     - https://docs.opencv.org/3.4/dc/d0d/tutorial_py_features_harris.html
