@@ -1,6 +1,8 @@
 from PIL import Image
 import math
 from tqdm import tqdm
+import numpy as np
+import cv2
 
 
 def rounddata(inputdata, factor=20, withCounts=False):
@@ -160,3 +162,40 @@ def replace_color(inputimage, oldcolor, newcolor):
     newim.putdata(newdata)
 
     return newim
+
+
+def pil_to_cv(inputimage):
+    '''
+    convert PIL Image object to opencv numpy array
+    '''
+    cv = np.array(inputimage)
+    cv = cv[:, :, ::-1].copy()
+
+    return cv
+
+
+def pull_to_board(inputimage, newcolor, size=8):
+
+    data = list(inputimage.getdata())
+    width, height = inputimage.size
+
+    newdata = []
+    for y in range(height):
+        if y <= size or height-y <= size:
+            newdata = newdata + ([newcolor] * width)
+
+        else:
+            for x in range(width):
+                if x <= size or width-x <= size:
+                    newdata.append(newcolor)
+                else:
+                    newdata.append(data[(y * width) + x])
+
+    newim = Image.new("RGB", inputimage.size)
+    newim.putdata(newdata)
+
+    return newim
+
+
+if __name__ == "__main__":
+    print("you ran the library file. Probably an accident")

@@ -51,7 +51,10 @@ board_color = analyze.find_board_color(from_pallete)
 print(f"board color is: {board_color}")
 from_pallete = round_image.replace_color(from_pallete, board_color, (255, 255, 255))
 
+# Fix edges
+fixed = round_image.pull_to_board(from_pallete, (255, 255, 255))
 
+######################################################
 # Make color pallete image for visual check
 pallete_img = Image.new("RGB", (len(pallete), 1))
 pallete_img.putdata(pallete)
@@ -60,6 +63,6 @@ pallete_img.putdata(pallete)
 # Show images
 # rounded_image.show()
 smooth_img.show()
-from_pallete.show()
+# from_pallete.show()
+fixed.show()
 # pallete_img.show()
-
