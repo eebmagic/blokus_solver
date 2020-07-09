@@ -133,3 +133,18 @@ def from_pallete(inputimage, pallete):
 
     return newim
 
+
+def replace_color(inputimage, oldcolor, newcolor):
+    data = list(inputimage.getdata())
+    
+    newdata = []
+    for point in data:
+        if point[:3] == oldcolor:
+            newdata.append(newcolor)
+        else:
+            newdata.append(point)
+
+    newim = Image.new("RGB", inputimage.size)
+    newim.putdata(newdata)
+
+    return newim

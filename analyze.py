@@ -38,19 +38,30 @@ def color_counts(inputimage, roundThresh=10, total=None):
         return top[::-1]
 
 
-def find_board_color(smallset):
+def find_board_color(inputimage):
     '''
-    Board color is probably the most gray
-    therefor, board color probably has lowest standard deviation between rgb values
+    Board color is probably the color that makes up the longest consecutive line of pixels
     '''
-    m = float("inf")
-    m_color = None
-    for color in smallset:
-        if stdev(color) < m:
-            m = stdev(color)
-            m_color = color
+    data = list(inputimage.getdata())
+    
+    longestColor = None
+    maxlen = 0
+    lastColor = data[0]
+    count = 0
+    for point in data:
+        if point == lastColor:
+            count += 1
+        else:
+            # update if longer
+            if count > maxlen:
+                longestColor = lastColor
+                maxlen = count
+            
+            # reset
+            count = 1
+            lastColor = point
 
-    return m_color
+    return longestColor[:3]
 
 
 if __name__ == "__main__":
