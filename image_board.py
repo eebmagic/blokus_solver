@@ -3,6 +3,7 @@ from PIL import ImageEnhance
 import round_image
 import analyze
 import os
+from sklearn.cluster import KMeans
 
 
 source_dir = "./source_images/"
@@ -16,48 +17,49 @@ im = im.resize((22*12, 22*12))
 data = list(im.getdata())
 
 # Make smooth & low-color image
-rounded_image = round_image.roundimage(im, factor=50)
 smooth_img = round_image.smoothimage(im, tolerance=50)
 smooth_img = round_image.smoothimage(smooth_img, tolerance=75)
 
-# Increase exposure of rounded image
-enhancer = ImageEnhance.Brightness(smooth_img)
-brightness_increase = 1.2
-brightened = enhancer.enhance(brightness_increase)
 
-# Resize and get counts
-# rounded_image = rounded_image.resize((22*4, 22*4))
-# smooth_img = smooth_img.resize((22*8, 22*8))
-# counts = analyze.color_counts(smooth_img, roundThresh=50)
-# top = analyze.color_counts(smooth_img, roundThresh=50, total=5)
-brightened = brightened.resize((22*8, 22*8))
-counts = analyze.color_counts(brightened, roundThresh=75)
-print(counts)
-quit()
-top = analyze.color_counts(brightened, roundThresh=75, total=6)
-pallete = [x[0] for x in top]
-print(len(counts), len(top), (22*8)**2)
-print(top)
+# Make KMeans based labels
+colors = list(smooth_img.getdata())
+colors = [x[:3] for x in colors]
+est = KMeans(n_clusters=5)
+est.fit(colors)
+labels = est.labels_
+
+# Separate colors into groups by labels
+groups = {}
+for i in range(5):
+    groups[i] = []
+
+for ind, color in enumerate(colors):
+    l = labels[ind]
+    groups[l].append(color)
+
+# Make pallete with average of color for each group
+pallete = [None] * 5
+for group in groups:
+    pallete[group] = analyze.average_color(groups[group])
 
 
 # Make image with pallete from smooth image
-from_pallete = round_image.from_pallete(brightened, pallete)
+from_pallete = round_image.from_labeled_pallete(smooth_img, colors, labels, pallete)
 
 # Find and replace board color with white
 board_color = analyze.find_board_color(from_pallete)
-print(f"board color is: {board_color}, {counts[board_color]}")
+print(f"board color is: {board_color}")
 from_pallete = round_image.replace_color(from_pallete, board_color, (255, 255, 255))
 
 
 # Make color pallete image for visual check
-pallete = Image.new("RGB", (len(top), 1))
-pallete.putdata([x[0] for x in top])
+pallete_img = Image.new("RGB", (len(pallete), 1))
+pallete_img.putdata(pallete)
 
 
 # Show images
 # rounded_image.show()
-# smooth_img.show()
-brightened.show()
+smooth_img.show()
 from_pallete.show()
-# pallete.show()
+# pallete_img.show()
 

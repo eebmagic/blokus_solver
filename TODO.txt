@@ -1,10 +1,4 @@
 SHORT TERM:
-- Tweak color smoothing and exposure to optimize piece colors
-    - adjust color smoothing (attempt to mimic smooth_sample.png)
-    - variably adjust brightness based on initial image color brightness
-    - perhaps use sklearn for group classification of colors
-        - would require long amount of time (maybe over class weekend?)
-
 - Figure out piece sizes
     - HoughLines ?
     - using smallest parallel distances

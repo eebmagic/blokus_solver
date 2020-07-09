@@ -20,6 +20,7 @@ def round_pixel(pixel, roundThresh):
     b = b - (b % roundThresh)
     return tuple((r, g, b))
 
+
 def color_counts(inputimage, roundThresh=10, total=None):
     data = list(inputimage.getdata())
 
@@ -63,6 +64,21 @@ def find_board_color(inputimage):
 
     return longestColor[:3]
 
+
+def average_color(colorset):
+    r = 0
+    g = 0
+    b = 0
+    for x, y, z in colorset:
+        r += x
+        g += y
+        b += z
+
+    r //= len(colorset)
+    g //= len(colorset)
+    b //= len(colorset)
+
+    return (r, g, b)
 
 if __name__ == "__main__":
     source_path = "source_images/one.png"

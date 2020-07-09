@@ -134,6 +134,18 @@ def from_pallete(inputimage, pallete):
     return newim
 
 
+def from_labeled_pallete(inputimage, data, labels, pallete):
+    newdata = []
+    for ind, color in enumerate(data):
+        l = labels[ind]
+        newdata.append(pallete[l])
+
+    newim = Image.new("RGB", inputimage.size)
+    newim.putdata(newdata)
+
+    return newim
+
+
 def replace_color(inputimage, oldcolor, newcolor):
     data = list(inputimage.getdata())
     
