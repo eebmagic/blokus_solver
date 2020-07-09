@@ -1,6 +1,5 @@
 from PIL import Image
 from PIL import ImageEnhance
-import make_pallete_image
 import round_image
 import analyze
 import os
@@ -11,7 +10,7 @@ images = os.listdir(source_dir)
 images = [x for x in images if x.lower().endswith(".png")]
 
 # Load image
-image = images[1]
+image = images[0]
 im = Image.open(source_dir + image)
 im = im.resize((22*12, 22*12))
 data = list(im.getdata())

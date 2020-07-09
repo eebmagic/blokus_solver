@@ -1,15 +1,17 @@
+SHORT TERM:
 - Tweak color smoothing and exposure to optimize piece colors
-    - adjust palletes development to avoid choosing colors within a given distance threshold
+    - adjust color smoothing (attempt to mimic smooth_sample.png)
+    - variably adjust brightness based on initial image color brightness
     - perhaps use sklearn for group classification of colors
+        - would require long amount of time (maybe over class weekend?)
 
-- Identify board/background color
-    - use longest constant color since edge is most likely in the picture and guaranteed to be longer than any piece
+- Use HoughLines to figure out piece sizes
+    - using smallest parallel distances
 
-- Use Harris corner detection for finding corners of board
-    - use corners and do math to determine angle adjusted coordinates to check piece colors
-    - https://docs.opencv.org/3.4/dc/d0d/tutorial_py_features_harris.html
 
-- Find piece and arrangements
+
+LONG TERM:
+- Identify piece and arrangements
     - Hard code piece arrangements, by number of squares
     - Use contour fitting on color mask?
         - https://docs.opencv.org/3.4.9/dd/d49/tutorial_py_contour_features.html
