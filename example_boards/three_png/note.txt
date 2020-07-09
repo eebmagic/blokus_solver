@@ -1,0 +1,3 @@
+.txt and .json file were manually made based off of three.png source image
+
+generated image was made with Board.show()
