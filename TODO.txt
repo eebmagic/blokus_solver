@@ -1,5 +1,8 @@
 SHORT TERM:
-- either fix rotations/cropping OR just use better images?
+- Remove unused functions
+    - general formatting and renaming
+
+- Use KMeans labels for from_pallete instead of color_min_distance
 
 - Identify pieces and arrangements
     - Hard code piece arrangements, by number of squares
@@ -7,6 +10,8 @@ SHORT TERM:
         - https://docs.opencv.org/3.4.9/dd/d49/tutorial_py_contour_features.html
 
 LONG TERM:
+- either fix rotations/cropping OR just use better images?
+
 - Find solution
     - Let user pick their color
     - DFS / BFS and return largest usable piece?

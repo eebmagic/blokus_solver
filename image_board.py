@@ -12,9 +12,11 @@ from board import Board
 source_dir = "./source_images/"
 images = os.listdir(source_dir)
 images = [x for x in images if x.lower().endswith(".png")]
+print(f"images: {images}")
 
 # Load image
 image = images[2]
+print(f"using image: {image}")
 im = Image.open(source_dir + image)
 im = im.resize((22*12, 22*12))
 data = list(im.getdata())
