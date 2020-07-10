@@ -1,12 +1,9 @@
 SHORT TERM:
-- Figure out piece sizes
-    - HoughLines ?
-    - using smallest parallel distances
-
-
+- Get piece value at each gridpoint
+    - should just be able to read at fixed intervals if picture is straight?
 
 LONG TERM:
-- Identify piece and arrangements
+- Identify pieces and arrangements
     - Hard code piece arrangements, by number of squares
     - Use contour fitting on color mask?
         - https://docs.opencv.org/3.4.9/dd/d49/tutorial_py_contour_features.html
