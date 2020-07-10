@@ -52,6 +52,18 @@ def color_distance(x, y):
         raise(e)
 
 
+def min_diff_color_index(value, pallete):
+    mindist = float('inf')
+    mincolor = None
+
+    for ind, color in enumerate(pallete):
+        dist = color_distance(value, color)
+        if dist < mindist:
+            mindist = dist
+            mincolor = ind
+
+    return mincolor
+
 
 def avg_color(colorset):
     r, g, b = 0, 0, 0

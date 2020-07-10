@@ -5,11 +5,11 @@ class Board:
     spaces = []
 
     colors = {
-                '0':(150, 150, 150),
-                'y':(200, 150, 0),
-                'r':(150, 0, 0),
-                'g':(0, 100, 50),
-                'b':(0, 0, 100)
+                '0':(250, 250, 250),
+                'y':(225, 208, 47),
+                'r':(224, 66, 63),
+                'g':(9, 171, 89),
+                'b':(50, 110, 200)
             }
 
 
@@ -28,7 +28,7 @@ class Board:
     def show(self):
         data = []
         for row in self.spaces:
-            for point in row:
+            for point in row.strip():
                 data.append(self.colors[point])
 
         newim = Image.new("RGB", (self.size, self.size))
