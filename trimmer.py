@@ -17,7 +17,10 @@ def make_arr(data, dims):
 def row_is(row, value):
     for point in row:
         if point[:len(value)] != value:
+            print(f'returning false because: {point[:len(value)]} != {value}')
             return False
+        else:
+            print(f'passing because: {point[:len(value)]} == {value}')
     return True
 
 
@@ -29,6 +32,11 @@ def col_is(arr, col_ind, value):
 
 
 def find_edges(arr, value=(255, 255, 255)):
+    '''
+    Iterates through arr from all 4 directions and then finds
+    edge where first pixel doesn't have the given.
+    Returns the four edges that were found.
+    '''
     top = 0
     bottom = len(arr)
     left = 0
@@ -66,8 +74,13 @@ def find_edges(arr, value=(255, 255, 255)):
 
 
 def clean_to_size(arr, left, right, top, bottom):
+    '''
+    Trim the arr by the given margins.
+    TODO: This is really slow and needs to be sped up
+    '''
     newdata = []
     for ind, row in enumerate(arr):
+        print(f'{ind} / {len(arr)} = {ind / len(arr)}%')
         if ind >= top and ind <= bottom:
             newdata = newdata + row[left:right+1]
 
@@ -83,12 +96,15 @@ def full_clean(inputimage, value=(255, 255, 255)):
     data = list(inputimage.getdata())
     arr = make_arr(data, inputimage.size)
     
-    left, right, top, bottom = find_edges(arr)
+    print('Finding edges...')
+    left, right, top, bottom = find_edges(arr, value=value)
 
     # crops data into one-dimensional array for dumping to output
+    print('Croping data to new size...')
     newdata = clean_to_size(arr, left, right, top, bottom)
 
     # Make new image
+    print('Making new image...')
     width, height = (right - left+1), (bottom - top+1)
     newim = Image.new("RGB", (width, height))
     newim.putdata(newdata)
@@ -96,7 +112,8 @@ def full_clean(inputimage, value=(255, 255, 255)):
     return newim
 
 if __name__ == "__main__":
-    im = Image.open("medium.png")
+    im = Image.open("source_images/one.png")
 
     newim = full_clean(im)
+    print('Showing the new image...')
     newim.show()

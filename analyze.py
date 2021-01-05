@@ -96,6 +96,10 @@ def make_palletestring(pallete):
 
 
 def make_boardstring(inputimage, pallete):
+    '''
+    Makes a best guess from a trimmed image on what the value for each square is.
+    (Uses fixed grid points, so therefor dependant on how straight the source image is)
+    '''
     # Resize to be closer to board dimensions
     cellsize = 9
     resized = inputimage.resize((20*cellsize, 20*cellsize))
@@ -120,10 +124,6 @@ def make_boardstring(inputimage, pallete):
     # Temp image for debug
     sampled = Image.new("RGB", resized.size)
     sampled.putdata(data)
-    # sampled.show()
-
-    # inputimage.show()
-    # resized.show()
 
     return output.strip()
 
@@ -132,10 +132,11 @@ if __name__ == "__main__":
     path = "example_boards/cropped_example.png"
     im = Image.open(path)
 
-    # blur image
+    # Blur image
     im = im.filter(ImageFilter.GaussianBlur(radius=2))
 
-    # quick make pallete
+    # Quick make pallete
+    print('Making color pallete...')
     data = list(im.getdata())
     pallete = []
     for point in data:
@@ -143,10 +144,13 @@ if __name__ == "__main__":
             pallete.append(point[:3])
 
     # Make outputstring
+    print('Making board string from image...')
     outstring = make_boardstring(im, pallete)
+    print(f'built {outstring = }')
 
     # Make Board from string
     from board import Board
     b = Board()
     b.load(outstring)
     b.show()
+    print('b = ', b)

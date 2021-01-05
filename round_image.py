@@ -6,6 +6,9 @@ import cv2
 
 
 def rounddata(inputdata, factor=20, withCounts=False):
+    '''
+    TODO: This should probably be refactored to round_data()
+    '''
     outdata = []
     print(f"rounding with factor: {factor}")
     counts = {}
@@ -27,6 +30,9 @@ def rounddata(inputdata, factor=20, withCounts=False):
 
 
 def roundimage(inputimage, factor=20):
+    '''
+    TODO: This should probably be refactored to round_image()
+    '''
     inputdata = list(inputimage.getdata())
     
     newdata = rounddata(inputdata, factor)
@@ -97,6 +103,9 @@ def most_common(colorset):
 
 
 def smoothimage(inputimage, tolerance=50, withavg=True):
+    '''
+    TODO: This should probably be refactored to smooth_image()
+    '''
     data = list(inputimage.getdata())
     width = inputimage.size[0]
 
@@ -207,7 +216,3 @@ def pull_to_board(inputimage, newcolor, size=8):
     newim.putdata(newdata)
 
     return newim
-
-
-if __name__ == "__main__":
-    print("you ran the library file. Probably an accident")
