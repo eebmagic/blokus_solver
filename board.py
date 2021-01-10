@@ -17,6 +17,7 @@ class Board:
     def __init__(self):
         '''
         default spaces for a board object is all empty spaces
+        TODO: Add optional param to define spaces here first
         '''
         for y in range(self.size):
             row = []
