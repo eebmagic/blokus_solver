@@ -34,16 +34,22 @@ def boolean_list(charList):
 
 
 def place(board, piece, x=0, y=0):
+    '''
+    Replace values in a board with values in a piece matrix
+    board: the numpy matrix to start with
+    piece: the smaller numpy matrix to get values from, which replace those in the board
+    x, y: the position on 
+    '''
     assert x >= 0 and x <= board.shape[1], "x must be >= 0 and <= board width"
     assert y >= 0 and y <= board.shape[0], f"y must be >= 0 and <= board height"
     assert type(piece) == np.ndarray, "Piece must be numpy array"
     assert type(board) == np.ndarray, "Board must be numpy array"
-    assert piece.shape[0] <= board.shape[0], "Piece x size can't be larger than the board"
-    assert piece.shape[1] <= board.shape[1], "Piece y size can't be larger than the board"
+    assert piece.shape[0] <= board.shape[0], f"Piece x size can't be larger than the board (widths: piece={piece.shape[0]}, board={board.shape[0]})"
+    assert piece.shape[1] <= board.shape[1], f"Piece y size can't be larger than the board ({y=}, height={board.shape[1]})"
     assert y + piece.shape[0] <= board.shape[0], "y can't place the piece outside of the board"
     assert x + piece.shape[1] <= board.shape[1], "x can't place the piece outside of the board"
 
-    out = board
+    out = board.copy()
     out[y:y + piece.shape[0], x:x + piece.shape[1]] += piece
     return out
 
@@ -74,6 +80,91 @@ def orientations(piece):
     return out
 
 
+def all_pieces():
+    '''
+    Returns all pieces (only a sinlge orientation per piece).
+    Returns pieces as a list of '0'/'x' strings
+    '''
+    with open('pieces.txt') as file:
+        content = file.read().strip()
+        pieces = content.split('\n\n')
+
+    return pieces
+
+
+def all_piece_orientations():
+    '''
+    Returns all pieces and all possible rotations/flips.
+    Returns pieces as a list of '0'/'x' strings
+    '''
+    out = []
+    for piece in all_pieces():
+        for orientation in orientations(piece):
+            out.append(string_from_list(orientation))
+
+    return out
+
+
+def expand_mask(mask):
+    '''
+    Turns a boolean piece mask into one that includes
+    the piece and all surrounding positions.
+    NOTE: This does not include diagonal directions,
+          so this can be used to verify valid plays.
+    '''
+    out = mask.copy()
+    adjusts = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    for y in range(len(out)):
+        for x in range(len(out[0])):
+            for x_adj, y_adj in adjusts:
+                x_real = x + x_adj
+                y_real = y + y_adj
+
+                if x_real >= 0 and x_real < len(out[0]):
+                    if y_real >= 0 and y_real < len(out):
+                        if mask[y_real][x_real]:
+                            out[y][x] = True
+
+    return out
+
+
+def check_surroundings(boardString, pieceOrientationString, position, verbose=False):
+    '''
+    Returns the counts for the colors under and around a piece at a given position.
+
+    boardString: str of the board spaces
+    peiceOrientationString: the '0'/'x' str of the piece in the target orientation
+    position: the (x, y) position to place the piece on the board
+    verbose: optional param for printouts
+    '''
+    piece = np.array(boolean_list(list_from_string(pieceOrientationString)))
+    board = np.array(list_from_string(boardString))
+    x, y = position
+
+    mask = place(np.full(board.shape, False), piece, x=x, y=y)
+    expanded = expand_mask(mask)
+
+    piece_result = board[mask]
+    expanded_result = board[expanded]
+
+    # Check contents of results all same value
+    unique, counts = np.unique(piece_result, return_counts=True)
+    original_counts = dict(zip(unique, counts))
+    unique, counts = np.unique(expanded_result, return_counts=True)
+    expanded_counts = dict(zip(unique, counts))
+
+    if verbose:
+        print('\nVerbose output from check_surroundings():')
+        print('Mask:')
+        print(mask)
+        print(original_counts)
+        print('Expanded:')
+        print(expanded)
+        print(expanded_counts)
+
+    return expanded_counts
+
+
 def find_positions(board, piece, verbose=False):
     '''
     Given a piece, find all positions the piece can possibly be placed in
@@ -85,11 +176,6 @@ def find_positions(board, piece, verbose=False):
 
     Should return a dictionary of char -> positions where piece fits on those chars.
     For example out['0'] would be all free spaces where the piece can fit,
-
-    TODO: Maybe need another function to identify valid existing pieces on the board?
-    Could also check for invalid pieces to verify board recognition.
-
-    TODO: Add check for piece color with player color on board for valid plays?
     '''
 
     # Run checks on params
@@ -113,11 +199,8 @@ def find_positions(board, piece, verbose=False):
         print(board_arr)
         print("\nHere's the piece:")
         print(piece)
-        print("\nHere's a mask:")
+        print("\nHere's a mask for the piece:")
         print(masks[0])
-        print("\nAnd another:")
-        print(masks[-1])
-        print(type(masks[0]))
 
     output = {}
 
@@ -127,7 +210,6 @@ def find_positions(board, piece, verbose=False):
             for y in range(0, board_arr.shape[0] - mask.shape[0] + 1):
                 position = (x, y)
 
-                # TODO: Fill this in
                 # Make the piece matrix the same size as board, adjusted by x, y
                 piece_mask = place(np.full(board_arr.shape, False), mask, x=x, y=y)
 
@@ -141,21 +223,43 @@ def find_positions(board, piece, verbose=False):
                 if len(counts) == 1:
                     existing_value = list(counts.keys())[0]
                     orientation = string_from_list(ors[mask_ind])
+                        
+                    # Verify that position holds true given surroundings (if not an empty space)
+                    valid_placement = True
+                    if existing_value != '0':
+                        surrounding_counts = check_surroundings(board, orientation, position)
+                        if counts[existing_value] != surrounding_counts[existing_value]:
+                            valid_placement = False
 
-                    if verbose:
+                    if verbose and valid_placement:
                         print(f"\nHere's the piece mask ({x}, {y}):")
                         print(piece_mask)
                         print(board_arr)
+                        print(result)
                         print(f"Position: {position}")
                         print(f'{existing_value = }')
                         print('orientation:')
                         print(orientation)
 
-                    entry = (position, orientation)
-                    if existing_value in output:
-                        output[existing_value].append(entry)
-                    else:
-                        output[existing_value] = [entry]
+                    if valid_placement:
+                        entry = (position, orientation)
+                        if existing_value in output:
+                            output[existing_value].append(entry)
+                        else:
+                            output[existing_value] = [entry]
+                else:
+                    # print(f'({position}) WAS NOT a valid position')
+                    # print(f"ERROR ({position}) Counts:")
+                    # print(counts)
+                    if verbose:
+                        print(f"\nHere's the piece mask ({x}, {y}):")
+                        print(piece_mask)
+                        print(board_arr)
+                        print(result)
+                        print(f"Position: {position}")
+                        print(f'{existing_value = }')
+                        print('orientation:')
+                        print(orientation)
 
     return output
 
@@ -171,18 +275,30 @@ if __name__ == '__main__':
 
 
     # x = list_from_string(pieces[0])
-    x = pieces[7]
-    out = find_positions(board_string, x, verbose=False)
+    # x = pieces[7]
+    # out = find_positions(board_string, x, verbose=False)
+    # print('\nFinished Output:')
+    # print(out)
+    # print(board_string)
+    # print("")
+
+    # for pos, orientaiton in out['0']:
+    #     print(pos)
+    #     print(orientaiton)
+    #     print("")
+
+    from board import Board
+    b = Board()
+    with open('example_boards/transcriptions/three.txt') as file:
+        content = file.read().strip()
+        b.load(content)
+
+    piece = all_pieces()[0]
+    out = find_positions(str(b), piece, verbose=True)
+
+    print("Piece:")
+    print(piece)
     print(out)
-
-    print(board_string)
-    print("")
-
-    for pos, orientaiton in out['0']:
-        print(pos)
-        print(orientaiton)
-        print("")
-
 
     # for piece in pieces:
     #     rots = orientations(piece)

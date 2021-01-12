@@ -57,12 +57,9 @@ def build_board(image):
     print("Determining board color...")
     board_color = analyze.find_board_color(from_pallete)
     print(f"\tBoard color is: {board_color}")
-    # from_pallete = round_image.replace_color(from_pallete, board_color, (255, 255, 255))
-    # TODO: Fix this ^ to pass board_color bellow instead of doing a color replace with white
 
     # Fix and crop out edges
     print("Cropping image...")
-    # fixed = round_image.pull_to_board(from_pallete, (255, 255, 255))
     fixed = round_image.pull_to_board(from_pallete, board_color)
     cropped = trimmer.full_clean(fixed)
 

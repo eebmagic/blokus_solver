@@ -5,12 +5,15 @@ SHORT TERM:
 - Use KMeans labels for from_pallete instead of color_min_distance
 
 - Identify pieces and arrangements
-    - Hard code piece arrangements, by number of squares
-    - Use contour fitting on color mask?
+    - Switch to using contour fitting on color masked images?
         - https://docs.opencv.org/3.4.9/dd/d49/tutorial_py_contour_features.html
 
 LONG TERM:
-- either fix rotations/cropping OR just use better images?
+- Check for invalid pieces on the board
+    - Useful for checking proper image->board translation
+    - If duplicate pieces of one color, then invalid board
+
+- Either fix rotations/cropping OR just use better images?
 
 - Find solution
     - Let user pick their color
