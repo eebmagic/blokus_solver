@@ -1,4 +1,5 @@
 from PIL import Image
+import numpy
 
 class Board:
     size = 20
@@ -57,6 +58,34 @@ class Board:
         newim = Image.new("RGB", (self.size, self.size))
         newim.putdata(data)
         newim.show(title=title)
+
+
+    def highlight(self, playerColor, highlightMatrix, verbose=False):
+        assert playerColor in self.colors, 'playerColor must be in the set of defined colors'
+
+        if verbose:
+            print("Given highlight matrix:")
+            import numpy as np
+            for row in np.where(highlightMatrix, 'x', '0'):
+                print(''.join(row.tolist()))
+
+            print("Player color: ", playerColor)
+            print("Current spaces")
+            for row in self.spaces:
+                print(''.join(row))
+
+        data = []
+        for y, row in enumerate(self.spaces):
+            for x, value in enumerate(row):
+                if value == '0' and highlightMatrix[y][x]:
+                    r, g, b = self.colors[playerColor]
+                    data.append((r*2, g*2, b*2))
+                else:
+                    data.append(self.colors[value])
+
+        newim = Image.new("RGB", (self.size, self.size))
+        newim.putdata(data)
+        newim.show()
 
 
 '''

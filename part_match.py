@@ -33,21 +33,31 @@ def boolean_list(charList):
     return out
 
 
-def place(board, piece, x=0, y=0):
+def place(board, piece, x=0, y=0, verbose=False):
     '''
     Replace values in a board with values in a piece matrix
     board: the numpy matrix to start with
     piece: the smaller numpy matrix to get values from, which replace those in the board
     x, y: the position on 
     '''
-    assert x >= 0 and x <= board.shape[1], "x must be >= 0 and <= board width"
-    assert y >= 0 and y <= board.shape[0], f"y must be >= 0 and <= board height"
+    if verbose:
+        print(f'\n{piece.shape = }')
+        print(f'position: {x, y}')
+        print(piece)
+        print(f'{board.shape = }')
+
+    assert x >= 0 and x <= board.shape[0], "x must be >= 0 and <= board width"
+    assert y >= 0 and y <= board.shape[1], f"y must be >= 0 and <= board height"
     assert type(piece) == np.ndarray, "Piece must be numpy array"
     assert type(board) == np.ndarray, "Board must be numpy array"
-    assert piece.shape[0] <= board.shape[0], f"Piece x size can't be larger than the board (widths: piece={piece.shape[0]}, board={board.shape[0]})"
-    assert piece.shape[1] <= board.shape[1], f"Piece y size can't be larger than the board ({y=}, height={board.shape[1]})"
-    assert y + piece.shape[0] <= board.shape[0], "y can't place the piece outside of the board"
-    assert x + piece.shape[1] <= board.shape[1], "x can't place the piece outside of the board"
+    y_shape_msg = f"Piece y size can't be larger than the board ({y=}, height={board.shape[1]})"
+    x_shape_msg = f"Piece x size can't be larger than the board (widths: piece={piece.shape[0]}, board={board.shape[0]})"
+    assert piece.shape[1] <= board.shape[1], y_shape_msg
+    assert piece.shape[0] <= board.shape[0], x_shape_msg
+    y_position_msg = f"y can't place the piece outside of the board ({y=}, pieceHeight={piece.shape[0]}, boardHeight={board.shape[0]})"
+    x_position_msg = f"x can't place the piece outside of the board ({x=}, pieceHeight={piece.shape[1]}, boardHeight={board.shape[1]})"
+    assert y + piece.shape[0] <= board.shape[0], y_position_msg
+    assert x + piece.shape[1] <= board.shape[1], x_position_msg
 
     out = board.copy()
     out[y:y + piece.shape[0], x:x + piece.shape[1]] += piece
@@ -111,6 +121,7 @@ def expand_mask(mask):
     the piece and all surrounding positions.
     NOTE: This does not include diagonal directions,
           so this can be used to verify valid plays.
+    NOTE: The mask should already be the same shape of the board
     '''
     out = mask.copy()
     adjusts = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -124,6 +135,45 @@ def expand_mask(mask):
                     if y_real >= 0 and y_real < len(out):
                         if mask[y_real][x_real]:
                             out[y][x] = True
+
+    return out
+
+
+def diagonal_mask(mask, verbose=False):
+    '''
+    Turns a boolean piece mask into one that only
+    includes the diagonal connections.
+    Used to verify valid plays.
+    NOTE: The mask should already be the shape of the board.
+    '''
+    out = np.full(mask.shape, False)
+    diagonals = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    for y in range(len(out)):
+        for x in range(len(out[0])):
+            total = 0
+            for x_adj, y_adj in neighbors:
+                x_real = x + x_adj
+                y_real = y + y_adj
+                if x_real >= 0 and x_real < len(out[0]):
+                    if y_real >= 0 and y_real < len(out):
+                        if mask[y_real][x_real]:
+                            total -= 1
+
+            if total >= 0:
+                for x_adj, y_adj in diagonals:
+                    x_real = x + x_adj
+                    y_real = y + y_adj
+                    if x_real >= 0 and x_real < len(out[0]):
+                        if y_real >= 0 and y_real < len(out):
+                            if mask[y_real][x_real]:
+                                out[y][x] = True
+
+    if verbose:
+        print('Original:')
+        print(string_from_list(np.where(mask, 'x', '0').tolist()))
+        print('Generated:')
+        print(string_from_list(np.where(out, 'x', '0').tolist()))
 
     return out
 
@@ -163,6 +213,30 @@ def check_surroundings(boardString, pieceOrientationString, position, verbose=Fa
         print(expanded_counts)
 
     return expanded_counts
+
+
+def check_diagonal_surroundings(boardString, pieceOrientationString, position, verbose=False):
+    piece = np.array(boolean_list(list_from_string(pieceOrientationString)))
+    board = np.array(list_from_string(boardString))
+    x, y = position
+
+    if verbose:
+        print('Placing:')
+        print(piece)
+        print('Inside board:')
+        for i in str(board.tolist()).split('],'):
+            print(i)
+        print('At position: ', position)
+
+    mask = place(np.full(board.shape, False), piece, x=x, y=x)
+    diagonals = diagonal_mask(mask)
+
+    diagonal_result = board[diagonals]
+
+    unique, counts = np.unique(diagonal_result, return_counts=True)
+    diagonal_counts = dict(zip(unique, counts))
+
+    return diagonal_counts
 
 
 def find_positions(board, piece, verbose=False):
@@ -206,8 +280,10 @@ def find_positions(board, piece, verbose=False):
 
     # March masks across the board to check all valid positions
     for mask_ind, mask in enumerate(masks):
-        for x in range(0, board_arr.shape[1] - mask.shape[1] + 1):
-            for y in range(0, board_arr.shape[0] - mask.shape[0] + 1):
+        x_stop = board_arr.shape[1] - mask.shape[1]
+        y_stop = board_arr.shape[0] - mask.shape[0]
+        for x in range(0, x_stop):
+            for y in range(0, y_stop):
                 position = (x, y)
 
                 # Make the piece matrix the same size as board, adjusted by x, y
