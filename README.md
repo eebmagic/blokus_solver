@@ -1,3 +1,12 @@
+# Blokus Solver
+A solver for boards from the game [Blokus](https://en.wikipedia.org/wiki/Blokus).
+
+1. User takes an image of the board and feed it into the program
+2. Processes the image into a 20x20 grid game board object (hopefully filled in with valid pieces)
+3. Determines which pieces a player has left
+4. Determines which piece + position would be the best move for a player
+5. Displays that optimal move back to the user visually
+
 # File Guide:
 
 ## General:
